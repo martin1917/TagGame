@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:TagGame.Views.Controls"
              xmlns:vm="clr-namespace:TagGame.ViewModels"
              xmlns:common="clr-namespace:TagGame.Common"
+             xmlns:cmd="clr-namespace:TagGame.Commands"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="600">
 
@@ -13,21 +14,34 @@
         <vm:HistoryViewModel/>
     </UserControl.DataContext>
 
+    <UserControl.Resources>
+        <cmd:ChangeViewModelCommand x:Key="ChangeViewModelCommand"/>
+    </UserControl.Resources>
+
     <Grid Background="White">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
+        <TextBlock Grid.Row="1" 
+                   Text="История прошлых игр" 
+                   TextAlignment="Center"
+                   FontSize="20"
+                   FontStyle="Italic"
+                   FontWeight="Bold"/>
+
         <Button Grid.Row="0" 
                 Content="Назад" 
-                Command="{Binding ChangeViewModelCommand}"
+                HorizontalAlignment="Left"
+                Command="{StaticResource ChangeViewModelCommand}"
                 CommandParameter="{x:Static common:ViewModelTypes.Menu}"
-                Margin="15 20" 
-                FontSize="16"
+                Margin="15 10 0 0" 
+                FontSize="12"
                 Width="100"/>
 
-        <DataGrid Grid.Row="1"
+        <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Results}"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Top"

@@ -1,24 +1,34 @@
 ﻿using System;
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using TagGame.Commands;
 using TagGame.Data;
 using TagGame.ViewModels.Base;
+using System.IO;
+using TagGame.Service;
 
 namespace TagGame.ViewModels
 {
     public class HistoryViewModel : NotifyingObject
     {
-        public List<GameResult> Results { get; private set; } = new();
+        private IResultsManager service = new JsonResultsManager();
+        private IEnumerable<GameResult>? results;
+
+        public IEnumerable<GameResult>? Results 
+        {
+            get => results;
+            private set
+            {
+                results = value;
+                OnPropertyChanged();
+            }
+        }
 
         public HistoryViewModel()
         {
-            ChangeViewModelCommand = new ChangeViewModelCommand();
-            //tests
-            Results.AddRange(Enumerable.Range(0, 10).Select(i => new GameResult(DateTime.Now.AddHours(i), "03:21", 10 * i)));
+            Results = service.GetAll();
         }
-
-        public ICommand ChangeViewModelCommand { get; }
     }
 }

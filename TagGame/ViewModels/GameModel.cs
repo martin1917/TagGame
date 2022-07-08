@@ -5,6 +5,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using TagGame.Commands;
 using TagGame.Common;
+using TagGame.Data;
+using TagGame.Service;
 using TagGame.ViewModels.Base;
 
 namespace TagGame.ViewModels
@@ -18,21 +20,38 @@ namespace TagGame.ViewModels
         /// <summary> Таймер </summary>
         private readonly DispatcherTimer dispatcherTimer = new();
 
+        /// <summary> Класс сохраняет данные в json </summary>
+        private IResultsManager service = new JsonResultsManager();
+
         /// <summary> Координаты пустой ячейки </summary>
         private (int r, int c) gap = (Const.Row - 1, Const.Col - 1);
-        
+
+        /// <summary> Ячейки </summary>
+        private ObservableCollection<Cell> cells;
+
         /// <summary> Состояние игры </summary>
         private GameStatus status = GameStatus.Prepare;
 
         /// <summary> Время игры </summary>
         private TimeOnly time = new(0, 0, 0);
+
+        /// <summary> Дата запуска партии </summary>
+        private DateTime date;
         
         /// <summary> Кол-во перемещений </summary>
         private int step = 0;
 
         #region props
-        /// <summary> Ячейки </summary>
-        public ObservableCollection<Cell> Cells { get; private set; }
+        /// <summary> Свойство для ячеек </summary>
+        public ObservableCollection<Cell> Cells
+        {
+            get => cells;
+            private set
+            {
+                cells = value;
+                OnPropertyChanged();
+            }
+        }
 
         /// <summary> Свойство для статуса игры </summary>
         public GameStatus Status
@@ -66,11 +85,9 @@ namespace TagGame.ViewModels
             ChangeStatusGameCommand = new LambdaCommand(OnChangeStatusGameCommandExecuted, CanChangeStatusGameCommandExecute);
             ReplayCommand = new LambdaCommand(OnReplayCommandExecuted, CanReplayCommandExecute);
             RestartGameCommand = new LambdaCommand(OnRestartGameCommandExecuted, CanRestartGameCommandExecute);
-            ChangeViewModelCommand = new ChangeViewModelCommand();
             #endregion
 
             SetSettingsTimer();
-
             PrepareCells();
         }
 
@@ -146,7 +163,6 @@ namespace TagGame.ViewModels
                 select new Cell(k / Const.Row, k % Const.Col, k + 1);
 
             Cells = new ObservableCollection<Cell>(preparingCells);
-            OnPropertyChanged(nameof(Cells));
         }
 
         /// <summary>
@@ -154,13 +170,16 @@ namespace TagGame.ViewModels
         /// </summary>
         private void Mix()
         {
-            var dirs = Enum.GetValues<Direction>();
-            for (int i = 0; i < 100; i++)
-            {
-                var index = rnd.Next(dirs.Length);
-                var dir = dirs[index];
-                MoveInDiraction(dir);
-            }
+            //var dirs = Enum.GetValues<Direction>();
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    var index = rnd.Next(dirs.Length);
+            //    var dir = dirs[index];
+            //    MoveInDiraction(dir);
+            //}
+            MoveInDiraction(Direction.Right);
+            MoveInDiraction(Direction.Right);
+            MoveInDiraction(Direction.Down);
         }
 
         /// <summary>
@@ -179,8 +198,6 @@ namespace TagGame.ViewModels
         }
 
         #region Commands
-
-        public ICommand ChangeViewModelCommand { get; }
 
         #region MoveGapCommand
         public ICommand MoveCommand { get; }  
@@ -201,6 +218,9 @@ namespace TagGame.ViewModels
             {
                 Status = GameStatus.Win;
                 dispatcherTimer.Stop();
+
+                GameResult res = new GameResult(date, Time, Steps);
+                service.Save(res);
             }
         }
         #endregion 
@@ -217,6 +237,7 @@ namespace TagGame.ViewModels
             Steps = 0;
             Status = GameStatus.Play;
             dispatcherTimer.Start();
+            date = DateTime.Now;
         }
         #endregion
 

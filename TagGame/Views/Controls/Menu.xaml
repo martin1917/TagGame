@@ -6,12 +6,17 @@
              xmlns:local="clr-namespace:TagGame.Views.Controls"
              xmlns:vm="clr-namespace:TagGame.ViewModels"
              xmlns:common="clr-namespace:TagGame.Common"
+             xmlns:cmd="clr-namespace:TagGame.Commands"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="600">
 
     <UserControl.DataContext>
         <vm:MenuViewModel/>
     </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <cmd:ChangeViewModelCommand x:Key="ChangeViewModelCommand"/>
+    </UserControl.Resources>
     
     <Grid Background="AntiqueWhite">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -23,10 +28,10 @@
                 </Style>
             </StackPanel.Resources>
             <Button Content="Играть"
-                    Command="{Binding ChangeViewModelCommand}"
+                    Command="{StaticResource ChangeViewModelCommand}"
                     CommandParameter="{x:Static common:ViewModelTypes.Game}"/>
             <Button Content="Статистика"
-                    Command="{Binding ChangeViewModelCommand}"
+                    Command="{StaticResource ChangeViewModelCommand}"
                     CommandParameter="{x:Static common:ViewModelTypes.History}"/>
         </StackPanel>
     </Grid>
