@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
 using TagGame.Commands;
+using TagGame.Common;
 using TagGame.ViewModels.Base;
 
 namespace TagGame.ViewModels
@@ -65,6 +66,7 @@ namespace TagGame.ViewModels
             ChangeStatusGameCommand = new LambdaCommand(OnChangeStatusGameCommandExecuted, CanChangeStatusGameCommandExecute);
             ReplayCommand = new LambdaCommand(OnReplayCommandExecuted, CanReplayCommandExecute);
             RestartGameCommand = new LambdaCommand(OnRestartGameCommandExecuted, CanRestartGameCommandExecute);
+            ChangeViewModelCommand = new ChangeViewModelCommand();
             #endregion
 
             SetSettingsTimer();
@@ -178,6 +180,8 @@ namespace TagGame.ViewModels
 
         #region Commands
 
+        public ICommand ChangeViewModelCommand { get; }
+
         #region MoveGapCommand
         public ICommand MoveCommand { get; }  
 
@@ -267,130 +271,5 @@ namespace TagGame.ViewModels
         #endregion
 
         #endregion
-    }
-
-    /// <summary> Ячейка для игры в пятнашки </summary>
-    public class Cell : NotifyingObject
-    {
-        int row, col;
-
-        public int Num { get; }
-        public int Y => Const.Offset * row;
-        public int X => Const.Offset * col;
-
-        #region props for ui
-        public int Size => Const.CellSize;
-        #endregion
-
-        public Cell(int row, int col, int num)
-        {
-            this.row = row;
-            this.col = col;
-            Num = num;
-        }
-
-        public void Deconstruct(out int r, out int c)
-        {
-            r = row;
-            c = col;
-        }
-
-        public void Move(Direction dir)
-        {
-            switch (dir)
-            {
-                case Direction.Up: Up(); break;
-                case Direction.Down: Down(); break;
-                case Direction.Left: Left(); break;
-                case Direction.Right: Right(); break;
-            }
-        }
-
-        public bool IsHere(int row, int col) 
-            => this.row == row && this.col == col;
-
-        public bool IsCorrect() 
-            => row * Const.Col + col + 1 == Num;
-
-        void Up()
-        {
-            row--;
-            OnPropertyChanged(nameof(Y));
-        }
-
-        void Down()
-        {
-            row++;
-            OnPropertyChanged(nameof(Y));
-        }
-
-        void Left()
-        {
-            col--;
-            OnPropertyChanged(nameof(X));
-        }
-
-        void Right()
-        {
-            col++;
-            OnPropertyChanged(nameof(X));
-        }
-    }
-
-    /// <summary> Состояние игры </summary>
-    public enum GameStatus
-    {
-        /// <summary> Игра еще не началась </summary>
-        Prepare,
-
-        /// <summary> Игра в процессе </summary>
-        Play,
-
-        /// <summary> Игра на паузе </summary>
-        Pause,
-
-        /// <summary> Победа </summary>
-        Win,
-    }
-
-    /// <summary> Направления </summary>
-    public enum Direction
-    {
-        /// <summary> Вверх </summary>
-        Up,
-
-        /// <summary> Вниз </summary>
-        Down,
-
-        /// <summary> Влево </summary>
-        Left, 
-
-        /// <summary> Вправо </summary>
-        Right
-    }
-
-    /// <summary> Константы для программы </summary>
-    public static class Const
-    {
-        /// <summary> Кол-во строк </summary>
-        public static readonly int Row = 4;
-
-        /// <summary> Кол-во столбцов </summary>
-        public static readonly int Col = 4;
-
-        /// <summary> Размер ячейки </summary>
-        public static readonly int CellSize = 80;
-
-        /// <summary> Расстояние между ячейками </summary>
-        public static readonly int GapBetweenCells = 10;
-
-        /// <summary> Расстояние между левыми углами смежных ячеек </summary>
-        public static readonly int Offset = CellSize + GapBetweenCells;
-
-        /// <summary> Ширина поля </summary>м
-        public static readonly int WidthMap = Col * Offset - GapBetweenCells;
-
-        /// <summary> Выстоа поля </summary>м
-        public static readonly int HeightMap = Row * Offset - GapBetweenCells;
     }
 }

@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="TagGame.Views.Controls.History"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TagGame.Views.Controls"
+             xmlns:vm="clr-namespace:TagGame.ViewModels"
+             xmlns:common="clr-namespace:TagGame.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600">
+
+    <UserControl.DataContext>
+        <vm:HistoryViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" 
+                Content="Назад" 
+                Command="{Binding ChangeViewModelCommand}"
+                CommandParameter="{x:Static common:ViewModelTypes.Menu}"
+                Margin="15 20" 
+                FontSize="16"
+                Width="100"/>
+
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Results}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top"
+                  Background="White"
+                  Padding="10"
+                  CanUserAddRows="False"
+                  CanUserReorderColumns="False"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False"
+                  BorderThickness="0"
+                  HeadersVisibility="Column"
+                  AlternatingRowBackground="Silver"
+                  FontSize="16">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Дата" 
+                                    Binding="{Binding Date, StringFormat={}Время: {0:hh}:{0:mm}  День: {0:dd/MM/yy}}"/>
+                <DataGridTextColumn Header="Продолжительность" 
+                                    Binding="{Binding Time}"/>
+                <DataGridTextColumn Header="Кол-во перемещений"
+                                    Binding="{Binding Steps}"/>
+            </DataGrid.Columns>
+
+            <DataGrid.Resources>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                </Style>
+            </DataGrid.Resources>
+        </DataGrid>
+    </Grid>
+</UserControl>
