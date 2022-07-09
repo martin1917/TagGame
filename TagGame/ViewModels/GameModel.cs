@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -26,9 +25,6 @@ namespace TagGame.ViewModels
         /// <summary> Координаты пустой ячейки </summary>
         private (int r, int c) gap = (Const.Row - 1, Const.Col - 1);
 
-        /// <summary> Ячейки </summary>
-        private ObservableCollection<Cell> cells;
-
         /// <summary> Состояние игры </summary>
         private GameStatus status = GameStatus.Prepare;
 
@@ -43,15 +39,7 @@ namespace TagGame.ViewModels
 
         #region props
         /// <summary> Свойство для ячеек </summary>
-        public ObservableCollection<Cell> Cells
-        {
-            get => cells;
-            private set
-            {
-                cells = value;
-                OnPropertyChanged();
-            }
-        }
+        public Cell[] Cells { get; } = new Cell[Const.Row * Const.Col - 1];
 
         /// <summary> Свойство для статуса игры </summary>
         public GameStatus Status
@@ -158,11 +146,12 @@ namespace TagGame.ViewModels
         /// </summary>
         private void PrepareCells()
         {
-            var preparingCells =
-                from k in Enumerable.Range(0, Const.Row * Const.Col - 1)
-                select new Cell(k / Const.Row, k % Const.Col, k + 1);
-
-            Cells = new ObservableCollection<Cell>(preparingCells);
+            for(int k = 0; k < Cells.Length; k++)
+            {
+                int y = k / Const.Row;
+                int x = k % Const.Col;
+                Cells[k] = new Cell(y, x, k + 1);
+            }
         }
 
         /// <summary>
