@@ -1,12 +1,6 @@
-﻿using System;
-using System.Text.Json;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
-using TagGame.Commands;
+﻿using System.Collections.Generic;
 using TagGame.Data;
 using TagGame.ViewModels.Base;
-using System.IO;
 using TagGame.Service;
 
 namespace TagGame.ViewModels

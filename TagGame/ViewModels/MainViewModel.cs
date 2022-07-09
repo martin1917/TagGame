@@ -9,12 +9,9 @@ namespace TagGame.ViewModels
     {
         public NotifyingObject CurrentViewModel => Navigator.Instance.CurrentViewModel;
 
-        public ICommand ChangeViewModel { get; }
-
         public MainViewModel()
         {
             Navigator.Instance.StateChanged += () => OnPropertyChanged(nameof(CurrentViewModel));
-            ChangeViewModel = new ChangeViewModelCommand();
         }
     }
 }

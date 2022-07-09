@@ -105,8 +105,18 @@
                         <Setter Property="Visibility" Value="Collapsed"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Status}"
-                                             Value="{x:Static common:GameStatus.Pause}">
+                                         Value="{x:Static common:GameStatus.Pause}">
                                 <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+
+                    <Style x:Key="pause/play" TargetType="Button">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}"
+                                         Value="{x:Static common:GameStatus.Prepare}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -134,7 +144,8 @@
                         Margin="0 20 0 0"
                         Content="{Binding Status, Converter={StaticResource StatusToStringConverter}}"
                         Command="{Binding ChangeStatusGameCommand}"
-                        FontSize="20"/>
+                        FontSize="20"
+                        Style="{StaticResource pause/play}"/>
 
                 <Button Grid.Row="3" Grid.ColumnSpan="2" 
                         Margin="0 20 0 0"
