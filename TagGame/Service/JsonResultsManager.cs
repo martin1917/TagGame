@@ -19,8 +19,14 @@ namespace TagGame.Service
         {
             var jsons = DeserializeJsons()?.ToList() ?? new List<GameResult>();
             jsons.Add(result);
-            jsons = jsons.OrderBy(r => r.Steps).ThenBy(r => r.Time).Take(10).ToList();
-            using (var fs = new FileStream(PATH, FileMode.OpenOrCreate))
+
+            jsons = jsons
+                .OrderBy(r => r.Steps)
+                .ThenBy(r => r.Time)
+                .Take(10)
+                .ToList();
+
+            using var fs = new FileStream(PATH, FileMode.OpenOrCreate);
             JsonSerializer.Serialize(fs, jsons);
         }
 

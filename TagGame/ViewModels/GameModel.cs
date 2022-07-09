@@ -39,7 +39,7 @@ namespace TagGame.ViewModels
 
         #region props
         /// <summary> Свойство для ячеек </summary>
-        public Cell[] Cells { get; } = new Cell[Const.Row * Const.Col - 1];
+        public Cell[] Cells { get; private set; }
 
         /// <summary> Свойство для статуса игры </summary>
         public GameStatus Status
@@ -141,40 +141,35 @@ namespace TagGame.ViewModels
                 SwapWithGap(cell, dir.Value);
         }
 
-        /// <summary>
-        /// Подготовить ячейки
-        /// </summary>
+        /// <summary> Подготовить ячейки </summary>
         private void PrepareCells()
         {
+            Cells = new Cell[15];
             for(int k = 0; k < Cells.Length; k++)
             {
                 int y = k / Const.Row;
                 int x = k % Const.Col;
                 Cells[k] = new Cell(y, x, k + 1);
             }
+
+            OnPropertyChanged(nameof(Cells));
         }
 
-        /// <summary>
-        /// Перемешать ячейки
-        /// </summary>
+        /// <summary> Перемешать ячейки </summary>
         private void Mix()
         {
-            //var dirs = Enum.GetValues<Direction>();
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    var index = rnd.Next(dirs.Length);
-            //    var dir = dirs[index];
-            //    MoveInDiraction(dir);
-            //}
-            MoveInDiraction(Direction.Right);
-            MoveInDiraction(Direction.Right);
-            MoveInDiraction(Direction.Down);
+            var dirs = Enum.GetValues<Direction>();
+            for (int i = 0; i < 100; i++)
+            {
+                var index = rnd.Next(dirs.Length);
+                var dir = dirs[index];
+                MoveInDiraction(dir);
+            }
         }
 
         /// <summary>
         /// Проверить, что все ячейки стоят на своих местах
         /// </summary>
-        /// <returns></returns>
         private bool CheckWin() => Cells.All(c => c.IsCorrect());
 
         /// <summary> Переводим игровые параметры в начальные состояния </summary>

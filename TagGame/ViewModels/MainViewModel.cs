@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-using TagGame.Commands;
-using TagGame.Store;
+﻿using TagGame.Store;
 using TagGame.ViewModels.Base;
 
 namespace TagGame.ViewModels
@@ -11,7 +9,8 @@ namespace TagGame.ViewModels
 
         public MainViewModel()
         {
-            Navigator.Instance.StateChanged += () => OnPropertyChanged(nameof(CurrentViewModel));
+            Navigator.Instance.StateChanged += () 
+                => OnPropertyChanged(nameof(CurrentViewModel));
         }
     }
 }
