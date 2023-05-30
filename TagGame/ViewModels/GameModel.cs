@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
 using TagGame.Commands;
+using TagGame.Common;
+using TagGame.Data;
+using TagGame.Service;
 using TagGame.ViewModels.Base;
 
 namespace TagGame.ViewModels
@@ -17,21 +19,27 @@ namespace TagGame.ViewModels
         /// <summary> Таймер </summary>
         private readonly DispatcherTimer dispatcherTimer = new();
 
+        /// <summary> Класс сохраняет данные в json </summary>
+        private IResultsManager service = new JsonResultsManager();
+
         /// <summary> Координаты пустой ячейки </summary>
         private (int r, int c) gap = (Const.Row - 1, Const.Col - 1);
-        
+
         /// <summary> Состояние игры </summary>
         private GameStatus status = GameStatus.Prepare;
 
         /// <summary> Время игры </summary>
         private TimeOnly time = new(0, 0, 0);
+
+        /// <summary> Дата запуска партии </summary>
+        private DateTime date;
         
         /// <summary> Кол-во перемещений </summary>
         private int step = 0;
 
         #region props
-        /// <summary> Ячейки </summary>
-        public ObservableCollection<Cell> Cells { get; private set; }
+        /// <summary> Свойство для ячеек </summary>
+        public Cell[] Cells { get; private set; }
 
         /// <summary> Свойство для статуса игры </summary>
         public GameStatus Status
@@ -68,7 +76,6 @@ namespace TagGame.ViewModels
             #endregion
 
             SetSettingsTimer();
-
             PrepareCells();
         }
 
@@ -134,22 +141,21 @@ namespace TagGame.ViewModels
                 SwapWithGap(cell, dir.Value);
         }
 
-        /// <summary>
-        /// Подготовить ячейки
-        /// </summary>
+        /// <summary> Подготовить ячейки </summary>
         private void PrepareCells()
         {
-            var preparingCells =
-                from k in Enumerable.Range(0, Const.Row * Const.Col - 1)
-                select new Cell(k / Const.Row, k % Const.Col, k + 1);
+            Cells = new Cell[15];
+            for(int k = 0; k < Cells.Length; k++)
+            {
+                int y = k / Const.Row;
+                int x = k % Const.Col;
+                Cells[k] = new Cell(y, x, k + 1);
+            }
 
-            Cells = new ObservableCollection<Cell>(preparingCells);
             OnPropertyChanged(nameof(Cells));
         }
 
-        /// <summary>
-        /// Перемешать ячейки
-        /// </summary>
+        /// <summary> Перемешать ячейки </summary>
         private void Mix()
         {
             var dirs = Enum.GetValues<Direction>();
@@ -164,7 +170,6 @@ namespace TagGame.ViewModels
         /// <summary>
         /// Проверить, что все ячейки стоят на своих местах
         /// </summary>
-        /// <returns></returns>
         private bool CheckWin() => Cells.All(c => c.IsCorrect());
 
         /// <summary> Переводим игровые параметры в начальные состояния </summary>
@@ -197,6 +202,9 @@ namespace TagGame.ViewModels
             {
                 Status = GameStatus.Win;
                 dispatcherTimer.Stop();
+
+                GameResult res = new GameResult(date, Time, Steps);
+                service.Save(res);
             }
         }
         #endregion 
@@ -213,6 +221,7 @@ namespace TagGame.ViewModels
             Steps = 0;
             Status = GameStatus.Play;
             dispatcherTimer.Start();
+            date = DateTime.Now;
         }
         #endregion
 
@@ -267,130 +276,5 @@ namespace TagGame.ViewModels
         #endregion
 
         #endregion
-    }
-
-    /// <summary> Ячейка для игры в пятнашки </summary>
-    public class Cell : NotifyingObject
-    {
-        int row, col;
-
-        public int Num { get; }
-        public int Y => Const.Offset * row;
-        public int X => Const.Offset * col;
-
-        #region props for ui
-        public int Size => Const.CellSize;
-        #endregion
-
-        public Cell(int row, int col, int num)
-        {
-            this.row = row;
-            this.col = col;
-            Num = num;
-        }
-
-        public void Deconstruct(out int r, out int c)
-        {
-            r = row;
-            c = col;
-        }
-
-        public void Move(Direction dir)
-        {
-            switch (dir)
-            {
-                case Direction.Up: Up(); break;
-                case Direction.Down: Down(); break;
-                case Direction.Left: Left(); break;
-                case Direction.Right: Right(); break;
-            }
-        }
-
-        public bool IsHere(int row, int col) 
-            => this.row == row && this.col == col;
-
-        public bool IsCorrect() 
-            => row * Const.Col + col + 1 == Num;
-
-        void Up()
-        {
-            row--;
-            OnPropertyChanged(nameof(Y));
-        }
-
-        void Down()
-        {
-            row++;
-            OnPropertyChanged(nameof(Y));
-        }
-
-        void Left()
-        {
-            col--;
-            OnPropertyChanged(nameof(X));
-        }
-
-        void Right()
-        {
-            col++;
-            OnPropertyChanged(nameof(X));
-        }
-    }
-
-    /// <summary> Состояние игры </summary>
-    public enum GameStatus
-    {
-        /// <summary> Игра еще не началась </summary>
-        Prepare,
-
-        /// <summary> Игра в процессе </summary>
-        Play,
-
-        /// <summary> Игра на паузе </summary>
-        Pause,
-
-        /// <summary> Победа </summary>
-        Win,
-    }
-
-    /// <summary> Направления </summary>
-    public enum Direction
-    {
-        /// <summary> Вверх </summary>
-        Up,
-
-        /// <summary> Вниз </summary>
-        Down,
-
-        /// <summary> Влево </summary>
-        Left, 
-
-        /// <summary> Вправо </summary>
-        Right
-    }
-
-    /// <summary> Константы для программы </summary>
-    public static class Const
-    {
-        /// <summary> Кол-во строк </summary>
-        public static readonly int Row = 4;
-
-        /// <summary> Кол-во столбцов </summary>
-        public static readonly int Col = 4;
-
-        /// <summary> Размер ячейки </summary>
-        public static readonly int CellSize = 80;
-
-        /// <summary> Расстояние между ячейками </summary>
-        public static readonly int GapBetweenCells = 10;
-
-        /// <summary> Расстояние между левыми углами смежных ячеек </summary>
-        public static readonly int Offset = CellSize + GapBetweenCells;
-
-        /// <summary> Ширина поля </summary>м
-        public static readonly int WidthMap = Col * Offset - GapBetweenCells;
-
-        /// <summary> Выстоа поля </summary>м
-        public static readonly int HeightMap = Row * Offset - GapBetweenCells;
     }
 }

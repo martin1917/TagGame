@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
+using TagGame.Common;
 using TagGame.ViewModels;
 
 namespace TagGame.Converters
